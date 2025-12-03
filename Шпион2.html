@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<!--
+Created using JS Bin
+http://jsbin.com
+
+Copyright (c) 2025 by anonymous (http://jsbin.com/puwabujeqa/1/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<meta name="robots" content="noindex">
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brawl Stars: Шпион</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Roboto:wght@400;700&display=swap');
+
+        body {
+            background-color: #160e33;
+            background-image: radial-gradient(circle at 50% 50%, #2a2255 0%, #160e33 70%);
+            color: white;
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            user-select: none; /* Чтобы текст не выделялся при нажатиях */
+        }
+
+        h1 {
+            font-family: 'Lilita One', cursive;
+            font-size: 3rem;
+            color: #ffc500;
+            text-shadow: 3px 3px 0px #000;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 20px;
+            border: 4px solid #3c8bf2;
+            box-shadow: 0 0 20px rgba(60, 139, 242, 0.4);
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .card {
+            background: #fff;
+            color: #333;
+            padding: 20px 10px;
+            border-radius: 15px;
+            margin: 20px 0;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        .card.spy {
+            background: #ff4747;
+            color: white;
+            border: 4px solid #8b0000;
+        }
+
+        .card.brawler {
+            background: #ffc500;
+            color: #4a2c00;
+            border: 4px solid #e6ac00;
+        }
+
+        .role-text {
+            font-size: 2.2rem;
+            font-family: 'Lilita One', cursive;
+            text-transform: uppercase;
+            margin: 10px 0;
+            line-height: 1;
+        }
+
+        .role-sub {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .btn {
+            background: linear-gradient(to bottom, #3c8bf2, #1f6bc4);
+            border: none;
+            border-bottom: 5px solid #144a8a;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: 'Lilita One', cursive;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            margin-top: 10px;
+            touch-action: manipulation; /* Улучшает отклик на мобильных */
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            border-bottom: 1px solid #144a8a;
+        }
+
+        .btn-red {
+            background: linear-gradient(to bottom, #ff4747, #d32f2f);
+            border-bottom: 5px solid #8b0000;
+        }
+        
+        .btn-red:active {
+             border-bottom: 1px solid #8b0000;
+        }
+
+        .hidden-content {
+            display: none !important;
+        }
+
+        #player-indicator {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #b0dfff;
+            font-weight: bold;
+        }
+        
+        .icon {
+            font-size: 3.5rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>BRAWL SPY</h1>
+
+    <div class="container">
+        <div id="view-start">
+            <p style="font-size: 1.1rem; line-height: 1.5;">
+                Игра для 3 игроков.<br>
+                Двое — одна команда.<br>
+                Один — <b>Шпион</b>.<br>
+            </p>
+            <button id="btn-start" class="btn">Начать игру</button>
+        </div>
+
+        <div id="view-pass" class="hidden-content">
+            <div id="player-indicator">Игрок 1</div>
+            <div class="card" style="background: #2a2255; color: white; border: 2px dashed #555;">
+                <div class="icon">🔒</div>
+                <div>Секретно</div>
+            </div>
+            <button id="btn-reveal" class="btn">Показать роль</button>
+        </div>
+
+        <div id="view-role" class="hidden-content">
+            <div id="role-card-content" class="card">
+                </div>
+            <button id="btn-next" class="btn btn-red">Скрыть и передать</button>
+        </div>
+
+        <div id="view-end" class="hidden-content">
+            <div class="card" style="background: #53e06d; color: #004d13; border: 4px solid #2e8f41;">
+                <div class="icon">⚔️</div>
+                <div class="role-text">В БОЙ!</div>
+            </div>
+            <p>Обсуждайте и ищите шпиона!</p>
+            <button id="btn-restart" class="btn">Новая игра</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- ДАННЫЕ ---
+            const brawlersList = [
+                "Шелли", "Нита", "Кольт", "Булл", "Брок", "Эль Примо", "Барли", "Поко", "Роза",
+                "Джесси", "Динамайк", "Тик", "8-БИТ", "Рико", "Дэррил", "Пенни", "Карл", "Джеки", "Гас",
+                "Бо", "Эмз", "Сту", "Пайпер", "Пэм", "Фрэнк", "Биби", "Беа", "Нани", "Эдгар", "Грифф", "Гром", "Бонни", "Хэнк", "Анджело",
+                "Мортис", "Тара", "Джин", "Макс", "Мистер П", "Спраут", "Байрон", "Сквик", "Грей", "Виллоу", "Даг", "Чак", "Мелоди",
+                "Спайк", "Ворон", "Леон", "Сэнди", "Амбер", "Мэг", "Честер", "Кит", "Драко",
+                "Гэйл", "Вольт", "Колетт", "Лу", "Гавс", "Белль", "Базз", "Эш", "Лола", "Фэнг", "Ева", "Джанет", "Отис", "Сэм", "Бастер", "Мэнди", "R-T", "Мэйси", "Корделиус", "Перл", "Ларри и Лори", "Лили", "Берри", "Клэнси", "Мо", "Кендзи", "Джуджу", "Шейд"
+            ];
+
+            // --- ПЕРЕМЕННЫЕ ---
+            let playersCount = 3;
+            let currentPlayerIndex = 0;
+            let gameRoles = [];
+
+            // --- ЭЛЕМЕНТЫ DOM ---
+            const views = {
+                start: document.getElementById('view-start'),
+                pass: document.getElementById('view-pass'),
+                role: document.getElementById('view-role'),
+                end: document.getElementById('view-end')
+            };
+
+            const ui = {
+                indicator: document.getElementById('player-indicator'),
+                roleCard: document.getElementById('role-card-content'),
+                btnStart: document.getElementById('btn-start'),
+                btnReveal: document.getElementById('btn-reveal'),
+                btnNext: document.getElementById('btn-next'),
+                btnRestart: document.getElementById('btn-restart')
+            };
+
+            // --- ЛОГИКА ---
+
+            function switchView(viewName) {
+                // Скрываем все экраны
+                Object.values(views).forEach(el => el.classList.add('hidden-content'));
+                // Показываем нужный
+                views[viewName].classList.remove('hidden-content');
+            }
+
+            function shuffle(array) {
+                let currentIndex = array.length, randomIndex;
+                while (currentIndex != 0) {
+                    randomIndex = Math.floor(Math.random() * currentIndex);
+                    currentIndex--;
+                    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+                }
+                return array;
+            }
+
+            // Нажатие "Начать игру"
+            ui.btnStart.addEventListener('click', () => {
+                const randomBrawler = brawlersList[Math.floor(Math.random() * brawlersList.length)];
+                
+                // Создаем роли: 2 Бравлера, 1 Шпион
+                let roles = [randomBrawler, randomBrawler, "SPY"];
+                gameRoles = shuffle(roles);
+                currentPlayerIndex = 0;
+
+                updatePassScreen();
+                switchView('pass');
+            });
+
+            // Обновление экрана передачи
+            function updatePassScreen() {
+                ui.indicator.innerText = `Игрок ${currentPlayerIndex + 1}`;
+            }
+
+            // Нажатие "Показать роль"
+            ui.btnReveal.addEventListener('click', () => {
+                const role = gameRoles[currentPlayerIndex];
+                
+                // Очистка классов
+                ui.roleCard.className = 'card'; 
+                
+                if (role === "SPY") {
+                    ui.roleCard.classList.add('spy');
+                    ui.roleCard.innerHTML = `
+                        <div class="icon">🕵️‍♂️</div>
+                        <div class="role-text">ТЫ ШПИОН!</div>
+                        <div class="role-sub">Не пались и угадай персонажа.</div>
+                    `;
+                } else {
+                    ui.roleCard.classList.add('brawler');
+                    ui.roleCard.innerHTML = `
+                        <div class="icon">⭐</div>
+                        <div class="role-text">${role}</div>
+                        <div class="role-sub">Твоя команда. Найди шпиона!</div>
+                    `;
+                }
+                switchView('role');
+            });
+
+            // Нажатие "Скрыть и передать"
+            ui.btnNext.addEventListener('click', () => {
+                currentPlayerIndex++;
+                
+                if (currentPlayerIndex >= playersCount) {
+                    switchView('end');
+                } else {
+                    updatePassScreen();
+                    switchView('pass');
+                }
+            });
+
+            // Нажатие "Новая игра"
+            ui.btnRestart.addEventListener('click', () => {
+                switchView('start');
+            });
+
+        });
+    </script>
+</body>
+</html>
+
